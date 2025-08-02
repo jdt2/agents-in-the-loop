@@ -8,14 +8,6 @@ from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from dotenv import load_dotenv
 
-# Import browser agent routes
-from browser_agent.routes import browser_bp
-
-# Import our agent system
-from agents.base_agent import Task, Priority
-from agents.product_manager import ProductManagerAgent
-from agents.engineering_manager import EngineeringManagerAgent
-
 try:
     import anyio
     from claude_code_sdk import query, ClaudeCodeOptions
@@ -28,9 +20,6 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-
-# Register blueprints
-app.register_blueprint(browser_bp)
 
 # Store sessions in memory (use Redis or database in production)
 sessions = {}
