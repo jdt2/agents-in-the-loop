@@ -7,5 +7,6 @@ using Claude Code SDK integration.
 
 from .base_agent import BaseAgent
 from .frontend_engineer import FrontendEngineer
+from .backend_engineer import BackendEngineer
 
-__all__ = ['BaseAgent', 'FrontendEngineer']
+__all__ = ['BaseAgent', 'FrontendEngineer', 'BackendEngineer']
