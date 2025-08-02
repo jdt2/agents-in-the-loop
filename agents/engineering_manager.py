@@ -77,7 +77,7 @@ COORDINATION AREAS:
 
 CRITICAL REQUIREMENTS:
 - Always read SPEC.md first to understand requirements
-- Ensure frontend and backend use consistent ports (e.g., backend:8000, frontend:3000)
+- Ensure frontend and backend use consistent ports (e.g., backend:8000, frontend:3001)
 - API endpoints must match exactly between frontend calls and backend routes
 - Data models must be identical across layers (TypeScript ↔ Pydantic)
 - Authentication flows must be coordinated
@@ -144,73 +144,6 @@ in a perfectly coordinated full-stack application.
         
         return self.execute_task(task)
     
-    def generate_frontend_instructions(self, requirements: str) -> Dict[str, Any]:
-        """
-        Generate specific frontend development instructions
-        
-        Args:
-            requirements: Frontend-specific requirements
-            
-        Returns:
-            Dictionary containing task results
-        """
-        task = f"""
-Generate detailed frontend development instructions in frontend/CLAUDE.md based on these requirements:
-{requirements}
-
-The instructions should include:
-1. Technology stack (React, TypeScript, etc.)
-2. Exact API integration details:
-   - Base URL (e.g., http://localhost:8000)
-   - Specific endpoint paths
-   - HTTP methods and request/response formats
-   - Authentication headers and token handling
-3. Data models and TypeScript interfaces
-4. Component architecture and file structure
-5. State management approach
-6. Development server configuration (port 3000)
-7. Build and deployment instructions
-8. Testing requirements
-
-Make the instructions extremely specific and actionable for a frontend developer.
-"""
-        
-        return self.execute_task(task)
-    
-    def generate_backend_instructions(self, requirements: str) -> Dict[str, Any]:
-        """
-        Generate specific backend development instructions
-        
-        Args:
-            requirements: Backend-specific requirements
-            
-        Returns:
-            Dictionary containing task results
-        """
-        task = f"""
-Generate detailed backend development instructions in backend/CLAUDE.md based on these requirements:
-{requirements}
-
-The instructions should include:
-1. Technology stack (FastAPI, SQLAlchemy, etc.)
-2. API endpoint specifications:
-   - Exact endpoint paths (matching frontend expectations)
-   - HTTP methods and request/response schemas
-   - Authentication and authorization middleware
-   - Input validation and error handling
-3. Database models and schemas
-4. Server configuration (port 8000)
-5. CORS settings for frontend integration
-6. Development and deployment setup
-7. Testing and validation requirements
-8. API documentation generation
-
-Make the instructions extremely specific and actionable for a backend developer.
-Ensure all API endpoints exactly match what the frontend team expects to call.
-"""
-        
-        return self.execute_task(task)
-    
     def validate_project_alignment(self) -> Dict[str, Any]:
         """
         Validate that frontend and backend instructions are properly aligned
@@ -249,46 +182,6 @@ Generate a validation report showing:
 - Overall readiness score for development teams
 
 If issues are found, update the CLAUDE.md files to fix alignment problems.
-"""
-        
-        return self.execute_task(task)
-    
-    def create_development_workflow(self) -> Dict[str, Any]:
-        """
-        Create a coordinated development workflow for both teams
-        
-        Returns:
-            Dictionary containing workflow documentation
-        """
-        task = f"""
-Create a comprehensive development workflow document that coordinates frontend and backend development:
-
-1. Development Environment Setup
-   - Required tools and dependencies for both teams
-   - Local development server configuration
-   - Database setup and seeding
-
-2. Development Process
-   - Order of implementation (backend API first, then frontend integration)
-   - Testing strategy for each layer
-   - Integration testing approach
-
-3. API Contract Management
-   - How to handle API changes
-   - Version control for API specifications
-   - Communication protocol between teams
-
-4. Quality Assurance
-   - Code review requirements
-   - Testing standards
-   - Integration validation steps
-
-5. Deployment Coordination
-   - Build and deployment order
-   - Environment configuration
-   - Production deployment checklist
-
-Create this as a README.md in the project root directory to guide both development teams.
 """
         
         return self.execute_task(task)

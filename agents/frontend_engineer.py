@@ -23,10 +23,7 @@ class FrontendEngineer(BaseAgent):
         """
         super().__init__(frontend_directory, max_turns)
         self.agent_name = "Frontend Engineer"
-        self.supported_frameworks = [
-            "React", "Vue.js", "Angular", "Svelte", "Next.js", "Nuxt.js", 
-            "Vanilla JavaScript", "TypeScript", "Vite"
-        ]
+        self.supported_frameworks = ["React"]
     
     def get_agent_type(self) -> str:
         """Return the type/name of this agent"""
@@ -74,66 +71,6 @@ Make sure to include:
 Focus on creating production-ready code that follows modern frontend development practices.
 """
         return enhanced_prompt
-    
-    def create_react_app(self, app_name: str = "react-app", use_typescript: bool = True) -> Dict[str, Any]:
-        """
-        Create a React application
-        
-        Args:
-            app_name: Name of the React app
-            use_typescript: Whether to use TypeScript
-            
-        Returns:
-            Dictionary containing task results
-        """
-        tech_stack = "React with TypeScript" if use_typescript else "React with JavaScript"
-        task = f"Create a {tech_stack} application named '{app_name}' with modern best practices, Vite as build tool, and a sample component structure."
-        
-        return self.execute_task(task)
-    
-    def create_vue_app(self, app_name: str = "vue-app", use_typescript: bool = True) -> Dict[str, Any]:
-        """
-        Create a Vue.js application
-        
-        Args:
-            app_name: Name of the Vue app
-            use_typescript: Whether to use TypeScript
-            
-        Returns:
-            Dictionary containing task results
-        """
-        tech_stack = "Vue.js 3 with TypeScript" if use_typescript else "Vue.js 3 with JavaScript"
-        task = f"Create a {tech_stack} application named '{app_name}' with Composition API, Vite, and modern component structure."
-        
-        return self.execute_task(task)
-    
-    def create_component_library(self, library_name: str = "ui-components") -> Dict[str, Any]:
-        """
-        Create a reusable component library
-        
-        Args:
-            library_name: Name of the component library
-            
-        Returns:
-            Dictionary containing task results
-        """
-        task = f"Create a React TypeScript component library named '{library_name}' with Storybook, multiple reusable components (Button, Input, Card, Modal), proper TypeScript definitions, and build configuration for publishing."
-        
-        return self.execute_task(task)
-    
-    def create_dashboard_app(self, dashboard_type: str = "admin") -> Dict[str, Any]:
-        """
-        Create a dashboard application
-        
-        Args:
-            dashboard_type: Type of dashboard (admin, analytics, user, etc.)
-            
-        Returns:
-            Dictionary containing task results
-        """
-        task = f"Create a modern {dashboard_type} dashboard using React with TypeScript, including sidebar navigation, data tables, charts (using Chart.js or similar), responsive design, and sample data. Include routing and state management."
-        
-        return self.execute_task(task)
     
     def add_feature(self, feature_description: str) -> Dict[str, Any]:
         """
@@ -234,22 +171,29 @@ Test and validate the frontend implementation by performing the following steps:
 3. Run the build process to ensure code compiles without errors
 4. Check for any TypeScript compilation errors
 5. Validate that all imports and modules resolve correctly
-6. Run the development server briefly to ensure it starts without errors
-7. Create a simple validation script that tests core functionality
-8. Generate a test report showing what works and any issues found
+6. Start development server in background (npm run dev on port 3001)
+7. Wait for server ready signal (poll localhost:3001 until responding)
+8. Test basic application loading and rendering with HTTP requests
+9. Validate API integration endpoints are accessible (health check)
+10. Stop background server and cleanup processes
+11. Create a simple validation script that tests core functionality
+12. Generate a test report showing what works and any issues found
 
 Current project files:
 {files_context}
 
-IMPORTANT: Actually run the installation and build commands to verify everything works.
+IMPORTANT: Actually run the installation, build, and server commands to verify everything works.
 Make sure to:
 - Use the appropriate package manager (npm, yarn, or pnpm)
 - Handle any dependency conflicts or version issues
+- Start dev server in background with timeout handling
+- Test actual HTTP requests to verify server is responding
+- Properly cleanup background processes when done
 - Report specific error messages if anything fails
 - Suggest fixes for any problems found
-- Create a summary of the validation results
+- Create a summary of the validation results including server testing
 
-Please perform actual testing and validation, not just theoretical checks.
+Please perform actual testing and validation with real server startup, not just theoretical checks.
 """
         
         return self.execute_task(task)

@@ -6,7 +6,7 @@ You are building the React TypeScript frontend for a full-stack todo application
 ## Critical Configuration Requirements
 
 ### Development Server
-- **Port**: 3000 (mandatory)
+- **Port**: 3001 (mandatory)
 - **Start Command**: `npm run dev` or `yarn dev`
 - **Base URL for API**: `http://localhost:8000/api`
 
@@ -35,7 +35,7 @@ export const API_BASE_URL = 'http://localhost:8000/api';
 
 ### Build Tool Configuration
 - Use Vite as the build tool
-- Configure Vite to run on port 3000
+- Configure Vite to run on port 3001
 - Enable TypeScript strict mode
 
 ## Exact Data Models (Must Match Backend)
@@ -240,7 +240,7 @@ npm create vite@latest . -- --template react-ts
 npm install
 npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p
-npm run dev  # Must run on port 3000
+npm run dev  # Must run on port 3001
 ```
 
 ### Development Guidelines
@@ -273,7 +273,7 @@ npm run dev  # Must run on port 3000
 
 1. **API Compatibility**: All API calls must exactly match backend endpoints
 2. **Data Consistency**: Todo data model must match backend exactly
-3. **Port Configuration**: Frontend must run on port 3000
+3. **Port Configuration**: Frontend must run on port 3001
 4. **Error Handling**: Graceful handling of all error scenarios
 5. **Responsive Design**: Works on mobile and desktop
 6. **Performance**: Fast loading and smooth interactions
