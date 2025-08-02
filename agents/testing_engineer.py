@@ -32,7 +32,7 @@ class TestingEngineer(BaseAgent):
             "playwright": {
                 "type": "stdio",
                 "command": "npx",
-                "args": ["@playwright/mcp@latest", "--headless"],
+                "args": ["@playwright/mcp@latest"],
                 "env": {}
             }
         }

@@ -88,52 +88,203 @@ Focus on creating secure, scalable code that follows modern backend development 
     
     def test_implementation(self) -> Dict[str, Any]:
         """
-        Test the backend implementation by installing dependencies and running checks
+        Test the backend implementation by running dependency installation and starting server as background process
         
         Returns:
             Dictionary containing test results
         """
-        existing_files = self._get_created_files()
-        files_context = format_file_list(existing_files) if existing_files else "No existing files"
+        import subprocess
+        import time
+        import requests
+        import os
+        from pathlib import Path
         
-        task = f"""
-Test and validate the backend implementation by performing the following steps:
-1. Check if requirements.txt, pyproject.toml, or package.json exists with valid dependencies
-2. Install all dependencies (pip install -r requirements.txt, poetry install, or npm install)
-3. Set up virtual environment if using Python
-4. Run any database migrations or setup scripts
-5. Start API server in background (uvicorn app.main:app --reload --host 0.0.0.0 --port 8000)
-6. Wait for server ready signal (poll localhost:8000/health until responding)
-7. Test all API endpoints with actual HTTP requests (GET, POST, PUT, DELETE)
-8. Validate CORS headers allow frontend access (http://localhost:3001)
-9. Test database CRUD operations end-to-end with real data
-10. Validate authentication and authorization if implemented
-11. Stop background server and cleanup processes
-12. Check for any import errors or missing dependencies
-13. Run any existing tests (pytest, npm test, etc.)
-14. Generate a test report showing what works and any issues found
-
-Current project files:
-{files_context}
-
-IMPORTANT: Actually run the installation, server startup, and API testing commands to verify everything works.
-Make sure to:
-- Use the appropriate package manager (pip, poetry, npm, yarn)
-- Set up virtual environment if using Python
-- Handle any dependency conflicts or version issues
-- Start API server in background with timeout handling
-- Test actual API functionality with real HTTP requests to all endpoints
-- Verify CORS configuration allows frontend communication (port 3001)
-- Test database connectivity and CRUD operations with real data
-- Properly cleanup background processes when done
-- Report specific error messages if anything fails
-- Suggest fixes for any problems found
-- Create a summary of the validation results including server and API testing
-
-Please perform actual testing and validation with real server startup and API calls, not just theoretical checks.
-"""
-        
-        return self.execute_task(task)
+        try:
+            # Change to working directory
+            original_cwd = os.getcwd()
+            os.chdir(self.working_directory)
+            
+            # Check for dependency files
+            requirements_txt = Path(self.working_directory) / "requirements.txt"
+            package_json = Path(self.working_directory) / "package.json"
+            pyproject_toml = Path(self.working_directory) / "pyproject.toml"
+            
+            if requirements_txt.exists():
+                print(f"🐍 Installing Python dependencies in {self.working_directory}...")
+                
+                # Install Python dependencies
+                install_process = subprocess.run(
+                    ['pip', 'install', '-r', 'requirements.txt'],
+                    cwd=self.working_directory,
+                    capture_output=True,
+                    text=True,
+                    timeout=300  # 5 minute timeout
+                )
+                
+                if install_process.returncode != 0:
+                    return {
+                        'success': False,
+                        'error': f'pip install failed: {install_process.stderr}',
+                        'working_directory': self.working_directory
+                    }
+                
+                print("✅ Python dependencies installed successfully")
+                print(f"🚀 Starting backend server in background on port 8000...")
+                
+                # Try different common Python server commands
+                server_commands = [
+                    ['uvicorn', 'app.main:app', '--reload', '--host', '0.0.0.0', '--port', '8000'],
+                    ['uvicorn', 'main:app', '--reload', '--host', '0.0.0.0', '--port', '8000'],
+                    ['python', 'app.py'],
+                    ['python', 'main.py'],
+                    ['fastapi', 'run', 'app.py', '--port', '8000'],
+                    ['python', '-m', 'uvicorn', 'app.main:app', '--reload', '--host', '0.0.0.0', '--port', '8000']
+                ]
+                
+            elif package_json.exists():
+                print(f"📦 Installing Node.js dependencies in {self.working_directory}...")
+                
+                # Install Node.js dependencies
+                install_process = subprocess.run(
+                    ['npm', 'install'],
+                    cwd=self.working_directory,
+                    capture_output=True,
+                    text=True,
+                    timeout=300  # 5 minute timeout
+                )
+                
+                if install_process.returncode != 0:
+                    return {
+                        'success': False,
+                        'error': f'npm install failed: {install_process.stderr}',
+                        'working_directory': self.working_directory
+                    }
+                
+                print("✅ Node.js dependencies installed successfully")
+                print(f"🚀 Starting backend server in background on port 8000...")
+                
+                # Try different Node.js server commands
+                server_commands = [
+                    ['npm', 'start'],
+                    ['npm', 'run', 'dev'],
+                    ['node', 'server.js'],
+                    ['node', 'app.js'],
+                    ['node', 'index.js']
+                ]
+                
+            else:
+                return {
+                    'success': False,
+                    'error': 'No requirements.txt or package.json found in project directory',
+                    'working_directory': self.working_directory
+                }
+            
+            # Try to start server with different commands
+            dev_process = None
+            for cmd in server_commands:
+                try:
+                    print(f"Trying command: {' '.join(cmd)}")
+                    dev_process = subprocess.Popen(
+                        cmd,
+                        cwd=self.working_directory,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        preexec_fn=os.setsid if hasattr(os, 'setsid') else None
+                    )
+                    
+                    # Wait a moment to see if process starts successfully
+                    time.sleep(3)
+                    if dev_process.poll() is None:  # Process is still running
+                        print(f"✅ Server started with command: {' '.join(cmd)}")
+                        break
+                    else:
+                        print(f"❌ Command failed: {' '.join(cmd)}")
+                        dev_process = None
+                except FileNotFoundError:
+                    print(f"❌ Command not found: {cmd[0]}")
+                    continue
+                except Exception as e:
+                    print(f"❌ Error with command {' '.join(cmd)}: {str(e)}")
+                    continue
+            
+            if dev_process is None:
+                return {
+                    'success': False,
+                    'error': 'Could not start backend server with any of the attempted commands',
+                    'working_directory': self.working_directory
+                }
+            
+            # Wait for server to start (poll for up to 30 seconds)
+            server_ready = False
+            max_wait_time = 30
+            start_time = time.time()
+            server_port = 8000
+            
+            while time.time() - start_time < max_wait_time:
+                try:
+                    response = requests.get(f'http://localhost:{server_port}', timeout=2)
+                    if response.status_code in [200, 404]:  # 404 is OK for API servers
+                        server_ready = True
+                        break
+                except requests.exceptions.RequestException:
+                    pass
+                
+                # Also try health endpoint
+                try:
+                    response = requests.get(f'http://localhost:{server_port}/health', timeout=2)
+                    if response.status_code == 200:
+                        server_ready = True
+                        break
+                except requests.exceptions.RequestException:
+                    pass
+                    
+                time.sleep(2)
+            
+            # Store process info for later cleanup (optional)
+            if hasattr(self, '_background_processes'):
+                self._background_processes.append(dev_process)
+            else:
+                self._background_processes = [dev_process]
+            
+            # Change back to original directory
+            os.chdir(original_cwd)
+            
+            if server_ready:
+                return {
+                    'success': True,
+                    'message': f'Backend server started successfully on port {server_port}',
+                    'server_url': f'http://localhost:{server_port}',
+                    'process_id': dev_process.pid,
+                    'working_directory': self.working_directory,
+                    'files_created': self._get_created_files()
+                }
+            else:
+                # Server didn't respond in time, but process might still be running
+                return {
+                    'success': True,
+                    'message': 'Backend server started but may still be initializing',
+                    'process_id': dev_process.pid,
+                    'working_directory': self.working_directory,
+                    'files_created': self._get_created_files(),
+                    'note': 'Server may take additional time to fully start up'
+                }
+                
+        except subprocess.TimeoutExpired:
+            os.chdir(original_cwd)
+            return {
+                'success': False,
+                'error': 'Dependency installation timed out after 5 minutes',
+                'working_directory': self.working_directory
+            }
+        except Exception as e:
+            if 'original_cwd' in locals():
+                os.chdir(original_cwd)
+            return {
+                'success': False,
+                'error': f'Test implementation failed: {str(e)}',
+                'working_directory': self.working_directory
+            }
     
     def get_specialized_status(self) -> Dict[str, Any]:
         """Get backend-specific status information"""

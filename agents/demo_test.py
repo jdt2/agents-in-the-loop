@@ -17,7 +17,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-from agents import FrontendEngineer, BackendEngineer, EngineeringManager
+from agents import FrontendEngineer, BackendEngineer, EngineeringManager, TestingEngineer
 
 
 def print_separator(title: str = ""):
@@ -122,6 +122,12 @@ def demo_managed_fullstack_todo_app():
     backend_test_result = backend_agent.test_implementation()
     print_result(backend_test_result, "Backend Implementation Test")
     
+    # Step 7: Test Full Stack Implementation
+    print_separator("Step 7: Testing Full Stack Implementation")
+    print("🧪 Installing dependencies and validating full stack...")
+    fullstack_test_result = testing_engineer.test_web_application()
+    print_result(fullstack_test_result, "Full Stack Implementation Test")
+    
     # Summary
     print_separator("Managed Full-Stack Project Summary")
     print("✅ Engineering Manager coordinated full-stack application created and tested!")
@@ -155,6 +161,63 @@ def demo_managed_fullstack_todo_app():
         'frontend': {'agent': frontend_agent, 'result': frontend_result, 'test_result': frontend_test_result},
         'backend': {'agent': backend_agent, 'result': backend_result, 'test_result': backend_test_result}
     }
+
+
+def demo_managed_testing_engineer_app():
+    """Demo: Engineering Manager Coordinated Full-Stack Todo App"""
+    print_separator("Engineering Manager Coordinated Full-Stack Demo")
+    print("Creating a coordinated todo application using Engineering Manager → Frontend → Backend workflow...")
+    
+    # Step 1: Engineering Manager Coordinates the Project
+    # print_separator("Step 1: Engineering Manager Coordination")
+    # project_dir = os.path.join(os.path.dirname(current_dir), 'project')
+    # manager = EngineeringManager(project_dir)
+    
+    # print(f"👔 Manager Agent: {manager.get_agent_type()}")
+    # print(f"📂 Project Directory: {manager.working_directory}")
+    
+    # print(f"\n📋 Coordinating project from specification...")
+    # coordination_result = manager.coordinate_project()
+    # print_result(coordination_result, "Project Coordination")
+
+    # Step 2: Frontend Engineer Creates the Frontend
+    print_separator("Step 2: Frontend Engineer Frontend Creation")
+    frontend_dir = os.path.join(os.path.dirname(current_dir), 'project', 'frontend')
+    frontend_agent = FrontendEngineer(frontend_dir)
+    
+    print(f"🤖 Frontend Agent: {frontend_agent.get_agent_type()}")
+    print(f"📂 Frontend Directory: {frontend_agent.working_directory}")
+    
+
+    # Step 3: Backend Engineer Creates the Backend
+    print_separator("Step 3: Backend Engineer Backend Creation")
+    backend_dir = os.path.join(os.path.dirname(current_dir), 'project', 'backend')
+    backend_agent = BackendEngineer(backend_dir)
+
+
+    # Step 5: Test Frontend Implementation
+    print_separator("Step 5: Testing Frontend Implementation")
+    print("🧪 Installing dependencies and validating frontend...")
+    frontend_test_result = frontend_agent.test_implementation()
+    print_result(frontend_test_result, "Frontend Implementation Test")
+    
+    # Step 6: Test Backend Implementation
+    print_separator("Step 6: Testing Backend Implementation")
+    print("🧪 Installing dependencies and validating backend...")
+    backend_test_result = backend_agent.test_implementation()
+    print_result(backend_test_result, "Backend Implementation Test")
+
+    test_url = "http://localhost:3001"
+    
+    # Create the testing engineer
+    testing_engineer = TestingEngineer()
+    
+    # Step 7: Test Full Stack Implementation
+    print_separator("Step 7: Testing Full Stack Implementation")
+    print("🧪 Installing dependencies and validating full stack...")
+    fullstack_test_result = testing_engineer.test_web_application(test_url)
+    print_result(fullstack_test_result, "Full Stack Implementation Test")
+
 
 
 def demo_component_library():
@@ -301,7 +364,7 @@ def main():
             return
         
         # Run the main demo
-        demo_result = demo_managed_fullstack_todo_app()
+        # demo_result = demo_managed_fullstack_todo_app()
         
         # Ask if they want to see more demos
         print("\n" + "="*60)
@@ -312,6 +375,8 @@ def main():
             print("2. Frontend dashboard")
             print("3. Backend microservice")
             print("4. Agent status info")
+            print("5. Managed Full Stack Development")
+            print("6. Managed Testing Engineer Development")
             
             choice = input("Enter choice (1-4): ").strip()
             
@@ -324,6 +389,10 @@ def main():
             elif choice == '4':
                 demo_agent_status()
                 demo_backend_status()
+            elif choice == '5':
+                demo_managed_fullstack_todo_app()
+            elif choice == '6':
+                demo_managed_testing_engineer_app()
         
         print_separator("Demo Complete")
         print("✅ All demos completed successfully!")
