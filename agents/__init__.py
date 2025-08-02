@@ -10,5 +10,6 @@ from .frontend_engineer import FrontendEngineer
 from .backend_engineer import BackendEngineer
 from .testing_engineer import TestingEngineer
 from .engineering_manager import EngineeringManager
+from .product_manager import ProductManager
 
-__all__ = ['BaseAgent', 'FrontendEngineer', 'BackendEngineer', 'EngineeringManager', 'TestingEngineer']
+__all__ = ['BaseAgent', 'FrontendEngineer', 'BackendEngineer', 'EngineeringManager', 'TestingEngineer', 'ProductManager']
