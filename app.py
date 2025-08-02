@@ -1,18 +1,10 @@
 import os
 import asyncio
 import uuid
-import subprocess
-import json
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from dotenv import load_dotenv
-
-try:
-    import anyio
-    from claude_code_sdk import query, ClaudeCodeOptions
-    SDK_AVAILABLE = True
-except ImportError:
-    SDK_AVAILABLE = False
-    print("Claude Code SDK not available, using CLI subprocess method")
+import anyio
+from claude_code_sdk import query, ClaudeCodeOptions
 
 load_dotenv()
 
@@ -45,59 +37,11 @@ async def query_claude_code_sdk(prompt, options=None):
     
     return messages
 
-def query_claude_code_cli(prompt, max_turns=3):
-    """Query Claude Code using CLI subprocess"""
-    try:
-        cmd = [
-            'claude', 
-            '-p', 
-            prompt,
-            '--output-format', 'json',
-            '--max-turns', str(max_turns)
-        ]
-        
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=300,
-            env=dict(os.environ, ANTHROPIC_API_KEY=os.getenv('ANTHROPIC_API_KEY'))
-        )
-        
-        if result.returncode != 0:
-            raise Exception(f"Claude CLI error: {result.stderr}")
-        
-        # Parse the JSON response
-        response_data = json.loads(result.stdout)
-        
-        # Convert CLI response to SDK-like format
-        messages = [{
-            'type': 'result',
-            'subtype': response_data.get('subtype', 'success'),
-            'result': response_data.get('result', ''),
-            'duration_ms': response_data.get('duration_ms', 0),
-            'duration_api_ms': response_data.get('duration_api_ms', 0),
-            'num_turns': response_data.get('num_turns', 1),
-            'total_cost_usd': response_data.get('total_cost_usd', 0),
-            'session_id': response_data.get('session_id', '')
-        }]
-        
-        return messages
-        
-    except subprocess.TimeoutExpired:
-        raise Exception("Claude Code CLI timeout after 5 minutes")
-    except json.JSONDecodeError as e:
-        raise Exception(f"Failed to parse Claude CLI response: {str(e)}")
-    except Exception as e:
-        raise Exception(f"Claude Code CLI error: {str(e)}")
 
 def query_claude_code(prompt, max_turns=3):
-    """Query Claude Code using available method"""
-    if SDK_AVAILABLE:
-        options = ClaudeCodeOptions(max_turns=max_turns)
-        return run_async(query_claude_code_sdk(prompt, options))
-    else:
-        return query_claude_code_cli(prompt, max_turns)
+    """Query Claude Code using SDK"""
+    options = ClaudeCodeOptions(max_turns=max_turns)
+    return run_async(query_claude_code_sdk(prompt, options))
 
 @app.route('/')
 def index():

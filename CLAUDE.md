@@ -30,16 +30,15 @@ ANTHROPIC_API_KEY=your_api_key_here
 This is a Flask web application that integrates with the Claude Code SDK, providing both web interface and API endpoints for programmatic interaction with Claude Code.
 
 ### Core Architecture
-- **Dual SDK Support**: The app supports both the Claude Code SDK (preferred) and CLI subprocess fallback
+- **SDK-Only Integration**: The app requires the Claude Code SDK and will fail if not available
 - **Session Management**: In-memory session storage (sessions dict) tracks conversation history
 - **Async Integration**: Uses `anyio` and custom `run_async()` helper to bridge Flask's sync nature with Claude Code SDK's async API
 
 ### Key Components
 
 #### app.py (Main Application)
-- `query_claude_code_sdk()`: Primary method using Claude Code SDK with async/await
-- `query_claude_code_cli()`: Fallback method using subprocess to call `claude` CLI 
-- `query_claude_code()`: Router function that chooses SDK vs CLI based on availability
+- `query_claude_code_sdk()`: Core method using Claude Code SDK with async/await
+- `query_claude_code()`: Wrapper function that calls the SDK method with proper configuration
 - Session storage in `sessions` dict with UUID-based session IDs
 
 #### API Endpoints
@@ -56,14 +55,13 @@ This is a Flask web application that integrates with the Claude Code SDK, provid
 
 ### Dependencies Integration
 - **Flask**: Web framework handling HTTP routes and templating
-- **claude-code-sdk**: Primary integration with Claude Code SDK
+- **claude-code-sdk**: Required integration with Claude Code SDK
 - **anyio**: Async compatibility layer for Flask
 - **python-dotenv**: Environment variable management
-- **subprocess**: Fallback CLI integration when SDK unavailable
 
 ### Error Handling Strategy
-- SDK availability detection on import with graceful fallback
-- Comprehensive exception handling for both SDK and CLI methods
+- Required SDK imports will fail fast if SDK is not available
+- Comprehensive exception handling for SDK methods
 - User-friendly error messages in web interface
 - HTTP error handlers for 404/500 responses
 
