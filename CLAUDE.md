@@ -72,3 +72,6 @@ Environment variables support:
 - `SECRET_KEY` (session security)
 - `CLAUDE_CODE_USE_BEDROCK=1` (Bedrock integration)
 - `CLAUDE_CODE_USE_VERTEX=1` (Vertex AI integration)
+
+## SDK References
+- The GitHub repo for the claude code sdk to reference can be found here: https://github.com/anthropics/claude-code-sdk-python
