@@ -8,5 +8,6 @@ using Claude Code SDK integration.
 from .base_agent import BaseAgent
 from .frontend_engineer import FrontendEngineer
 from .backend_engineer import BackendEngineer
+from .engineering_manager import EngineeringManager
 
-__all__ = ['BaseAgent', 'FrontendEngineer', 'BackendEngineer']
+__all__ = ['BaseAgent', 'FrontendEngineer', 'BackendEngineer', 'EngineeringManager']

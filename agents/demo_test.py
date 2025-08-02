@@ -17,7 +17,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.insert(0, parent_dir)
 
-from agents import FrontendEngineer, BackendEngineer
+from agents import FrontendEngineer, BackendEngineer, EngineeringManager
 
 
 def print_separator(title: str = ""):
@@ -59,74 +59,99 @@ def print_result(result: Dict[str, Any], task_name: str):
         print(f"❌ Error: {result.get('error', 'Unknown error')}")
 
 
-def demo_fullstack_todo_app():
-    """Demo: Create a Full-Stack Todo App (Frontend + Backend)"""
-    print_separator("Full-Stack Todo App Demo")
-    print("Creating a complete todo application with React frontend and FastAPI backend...")
+def demo_managed_fullstack_todo_app():
+    """Demo: Engineering Manager Coordinated Full-Stack Todo App"""
+    print_separator("Engineering Manager Coordinated Full-Stack Demo")
+    print("Creating a coordinated todo application using Engineering Manager → Frontend → Backend workflow...")
     
-    # Step 1: Create Frontend (React Todo App)
-    print_separator("Step 1: Frontend (React Todo App)")
+    # Step 1: Engineering Manager Coordinates the Project
+    print_separator("Step 1: Engineering Manager Coordination")
+    project_dir = os.path.join(os.path.dirname(current_dir), 'project')
+    manager = EngineeringManager(project_dir)
+    
+    print(f"👔 Manager Agent: {manager.get_agent_type()}")
+    print(f"📂 Project Directory: {manager.working_directory}")
+    
+    print(f"\n📋 Coordinating project from specification...")
+    coordination_result = manager.coordinate_project()
+    print_result(coordination_result, "Project Coordination")
+    
+    # Step 2: Create Frontend Following Manager's Instructions
+    print_separator("Step 2: Frontend Implementation (Following Manager Instructions)")
     frontend_dir = os.path.join(os.path.dirname(current_dir), 'project', 'frontend')
     frontend_agent = FrontendEngineer(frontend_dir)
     
     print(f"🤖 Frontend Agent: {frontend_agent.get_agent_type()}")
     print(f"📂 Frontend Directory: {frontend_agent.working_directory}")
     
-    frontend_task = "Create a modern React TypeScript todo application with the following features: add/remove/edit todos, mark as complete, filter by status (all/active/completed), API integration for backend communication, and clean Tailwind CSS styling. Include API service layer for HTTP requests."
+    frontend_task = "Follow the detailed instructions in the CLAUDE.md file in this directory to create the frontend application. Read the CLAUDE.md file first and implement exactly what is specified, including API endpoints, data models, and configuration."
     
-    print(f"\n🚀 Creating frontend...")
+    print(f"\n🚀 Creating frontend following manager's instructions...")
     frontend_result = frontend_agent.execute_task(frontend_task)
-    print_result(frontend_result, "React Frontend Creation")
+    print_result(frontend_result, "Managed Frontend Creation")
     
-    # Step 2: Create Backend (FastAPI Todo API)
-    print_separator("Step 2: Backend (FastAPI Todo API)")
+    # Step 3: Create Backend Following Manager's Instructions
+    print_separator("Step 3: Backend Implementation (Following Manager Instructions)")
     backend_dir = os.path.join(os.path.dirname(current_dir), 'project', 'backend')
     backend_agent = BackendEngineer(backend_dir)
     
     print(f"🤖 Backend Agent: {backend_agent.get_agent_type()}")
     print(f"📂 Backend Directory: {backend_agent.working_directory}")
     
-    backend_task = "Create a FastAPI REST API for a todo application with the following features: CRUD operations for todos (create, read, update, delete), SQLite database with SQLAlchemy ORM, CORS middleware for frontend integration, input validation with Pydantic models, proper error handling, and API documentation. Include endpoints: GET /todos, POST /todos, PUT /todos/{id}, DELETE /todos/{id}."
+    backend_task = "Follow the detailed instructions in the CLAUDE.md file in this directory to create the backend application. Read the CLAUDE.md file first and implement exactly what is specified, including API endpoints, data models, port configuration, and CORS settings."
     
-    print(f"\n🚀 Creating backend...")
+    print(f"\n🚀 Creating backend following manager's instructions...")
     backend_result = backend_agent.execute_task(backend_task)
-    print_result(backend_result, "FastAPI Backend Creation")
+    print_result(backend_result, "Managed Backend Creation")
     
-    # Step 3: Test Frontend Implementation
-    print_separator("Step 3: Testing Frontend Implementation")
+    # Step 4: Validate Project Alignment
+    print_separator("Step 4: Project Alignment Validation")
+    print("🔍 Validating coordination between frontend and backend...")
+    validation_result = manager.validate_project_alignment()
+    print_result(validation_result, "Project Alignment Validation")
+    
+    # Step 5: Test Frontend Implementation
+    print_separator("Step 5: Testing Frontend Implementation")
     print("🧪 Installing dependencies and validating frontend...")
     frontend_test_result = frontend_agent.test_implementation()
     print_result(frontend_test_result, "Frontend Implementation Test")
     
-    # Step 4: Test Backend Implementation
-    print_separator("Step 4: Testing Backend Implementation")
+    # Step 6: Test Backend Implementation
+    print_separator("Step 6: Testing Backend Implementation")
     print("🧪 Installing dependencies and validating backend...")
     backend_test_result = backend_agent.test_implementation()
     print_result(backend_test_result, "Backend Implementation Test")
     
     # Summary
-    print_separator("Full-Stack Todo App Summary")
-    print("✅ Complete todo application created and tested!")
-    print(f"📁 Frontend: {frontend_dir}")
-    print(f"📁 Backend: {backend_dir}")
+    print_separator("Managed Full-Stack Project Summary")
+    print("✅ Engineering Manager coordinated full-stack application created and tested!")
+    print(f"👔 Manager: {project_dir}")
+    print(f"🎨 Frontend: {frontend_dir}")
+    print(f"⚙️ Backend: {backend_dir}")
     
     # Show test results summary
+    coordination_success = coordination_result.get('success', False)
+    validation_success = validation_result.get('success', False)
     frontend_success = frontend_test_result.get('success', False)
     backend_success = backend_test_result.get('success', False)
     
-    print(f"\n🧪 Test Results:")
+    print(f"\n📊 Coordination Results:")
+    print(f"   Project Coordination: {'✅ PASSED' if coordination_success else '❌ FAILED'}")
+    print(f"   Alignment Validation: {'✅ PASSED' if validation_success else '❌ FAILED'}")
     print(f"   Frontend Tests: {'✅ PASSED' if frontend_success else '❌ FAILED'}")
     print(f"   Backend Tests: {'✅ PASSED' if backend_success else '❌ FAILED'}")
     
-    if frontend_success and backend_success:
-        print("\n🎯 Ready to Run:")
-        print("   1. Navigate to backend directory and start the FastAPI server")
-        print("   2. Navigate to frontend directory and start the React development server")
-        print("   3. The frontend will communicate with the backend API")
+    if all([coordination_success, validation_success, frontend_success, backend_success]):
+        print("\n🎯 Perfectly Coordinated Application Ready!")
+        print("   1. Manager created aligned specifications")
+        print("   2. Frontend and Backend implemented according to specifications")
+        print("   3. All components tested and validated")
+        print("   4. Ready for production deployment")
     else:
-        print("\n⚠️  Some tests failed. Check the detailed output above for issues to resolve.")
+        print("\n⚠️  Some coordination or tests failed. Check detailed output above.")
     
     return {
+        'manager': {'agent': manager, 'coordination_result': coordination_result, 'validation_result': validation_result},
         'frontend': {'agent': frontend_agent, 'result': frontend_result, 'test_result': frontend_test_result},
         'backend': {'agent': backend_agent, 'result': backend_result, 'test_result': backend_test_result}
     }
@@ -250,9 +275,9 @@ def demo_backend_status():
 
 def main():
     """Main demo function"""
-    print_separator("Agents Demo - Full-Stack Todo App")
-    print("This demo creates a complete todo application with React frontend and FastAPI backend.")
-    print("Both agents work together to create a full-stack application.")
+    print_separator("Agents Demo - Engineering Manager Coordinated Development")
+    print("This demo shows Engineering Manager coordinating Frontend and Backend Engineers.")
+    print("Manager reads specifications and creates aligned instructions for both teams.")
     print("\nNote: Make sure you have ANTHROPIC_API_KEY set in your environment.")
     
     # Check if API key is available
@@ -264,18 +289,19 @@ def main():
     print(f"\n⏰ Demo started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     try:
-        # Default to full-stack todo app demo
-        print("\n🎯 Creating a full-stack todo application...")
-        print("This will demonstrate both Frontend and Backend Engineer agents working together.")
+        # Default to managed full-stack development demo
+        print("\n👔 Engineering Manager Coordinated Development")
+        print("This demonstrates the Manager → Frontend → Backend coordination workflow.")
+        print("The manager will read SPEC.md and create precise instructions for each team.")
         
         # Ask user if they want to continue
-        response = input("\nProceed with full-stack todo app demo? (y/n): ").lower().strip()
+        response = input("\nProceed with managed development demo? (y/n): ").lower().strip()
         if response != 'y':
             print("Demo cancelled.")
             return
         
         # Run the main demo
-        demo_result = demo_fullstack_todo_app()
+        demo_result = demo_managed_fullstack_todo_app()
         
         # Ask if they want to see more demos
         print("\n" + "="*60)

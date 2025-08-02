@@ -51,7 +51,7 @@ class BaseAgent(ABC):
         if options is None:
             options = ClaudeCodeOptions(
                 max_turns=self.max_turns,
-                allowed_tools=["read", "write", "edit", "grep", "Bash", "glob"],
+                allowed_tools=["read", "write", "edit", "grep", "Bash", "glob", "Bash(npm install)", "Bash(npm run dev)", "Bash(npm run build)", "Bash(python -m venv .venv)", "Bash(source .venv/bin/activate)"],
                 permission_mode="bypassPermissions"
             )
         
