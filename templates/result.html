@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Claude Code Results</h1>
+            <a href="/" class="back-link">← New Query</a>
+        </header>
+
+        <div class="session-info">
+            <h3>Session: {{ session.session_id }}</h3>
+            <div class="original-prompt">
+                <h4>Original Prompt:</h4>
+                <p>{{ session.prompt }}</p>
+            </div>
+        </div>
+
+        <div class="messages">
+            <h3>Claude Code Response:</h3>
+            {% for message in session.messages %}
+            <div class="message message-{{ message.type if message.type else 'unknown' }}">
+                {% if message.type == 'assistant' %}
+                <div class="message-header">
+                    <span class="message-type">Assistant</span>
+                </div>
+                <div class="message-content">
+                    {% if message.message and message.message.content %}
+                        {% for content_block in message.message.content %}
+                            {% if content_block.type == 'text' %}
+                                <pre>{{ content_block.text }}</pre>
+                            {% elif content_block.type == 'tool_use' %}
+                                <div class="tool-use">
+                                    <strong>Tool:</strong> {{ content_block.name }}<br>
+                                    <strong>Input:</strong> 
+                                    <pre>{{ content_block.input | tojson(indent=2) }}</pre>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <pre>{{ message.message | string }}</pre>
+                    {% endif %}
+                </div>
+                
+                {% elif message.type == 'user' %}
+                <div class="message-header">
+                    <span class="message-type">User</span>
+                </div>
+                <div class="message-content">
+                    {% if message.message and message.message.content %}
+                        {% for content_block in message.message.content %}
+                            {% if content_block.type == 'text' %}
+                                <pre>{{ content_block.text }}</pre>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <pre>{{ message.message | string }}</pre>
+                    {% endif %}
+                </div>
+                
+                {% elif message.type == 'result' %}
+                <div class="message-header">
+                    <span class="message-type">Result Summary</span>
+                </div>
+                <div class="result-summary">
+                    <p><strong>Status:</strong> {{ message.subtype }}</p>
+                    <p><strong>Duration:</strong> {{ "%.2f"|format(message.duration_ms / 1000) }}s</p>
+                    <p><strong>API Duration:</strong> {{ "%.2f"|format(message.duration_api_ms / 1000) }}s</p>
+                    <p><strong>Turns:</strong> {{ message.num_turns }}</p>
+                    {% if message.total_cost_usd %}
+                    <p><strong>Cost:</strong> ${{ "%.4f"|format(message.total_cost_usd) }}</p>
+                    {% endif %}
+                    {% if message.result %}
+                    <div class="final-result">
+                        <strong>Final Result:</strong>
+                        <pre>{{ message.result }}</pre>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% elif message.type == 'system' %}
+                <div class="message-header">
+                    <span class="message-type">System</span>
+                </div>
+                <div class="system-info">
+                    <p><strong>Model:</strong> {{ message.model }}</p>
+                    <p><strong>Working Directory:</strong> {{ message.cwd }}</p>
+                    <p><strong>Permission Mode:</strong> {{ message.permissionMode }}</p>
+                    {% if message.tools %}
+                    <p><strong>Available Tools:</strong> {{ message.tools | join(', ') }}</p>
+                    {% endif %}
+                </div>
+                
+                {% else %}
+                <div class="message-header">
+                    <span class="message-type">{{ message.type | title }}</span>
+                </div>
+                <div class="message-content">
+                    <pre>{{ message | tojson(indent=2) }}</pre>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="actions">
+            <a href="/" class="button">New Query</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code Web Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Claude Code Web Interface</h1>
+            <p>Interact with Claude Code SDK through a web interface</p>
+        </header>
+
+        {% if error %}
+        <div class="error">
+            <strong>Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/query" class="query-form">
+            <div class="form-group">
+                <label for="prompt">Enter your prompt:</label>
+                <textarea 
+                    id="prompt" 
+                    name="prompt" 
+                    rows="6" 
+                    placeholder="Enter your coding request or question here..."
+                    required
+                ></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="max_turns">Maximum turns:</label>
+                <select id="max_turns" name="max_turns">
+                    <option value="1">1 turn</option>
+                    <option value="3" selected>3 turns</option>
+                    <option value="5">5 turns</option>
+                    <option value="10">10 turns</option>
+                </select>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Query</button>
+        </form>
+
+        <div class="info">
+            <h3>Usage Examples:</h3>
+            <ul>
+                <li>"Write a Python function to calculate Fibonacci numbers"</li>
+                <li>"Review this code for bugs and suggest improvements"</li>
+                <li>"Create a REST API endpoint for user authentication"</li>
+                <li>"Add unit tests for the calculator module"</li>
+            </ul>
+        </div>
+
+        <div class="api-info">
+            <h3>API Access:</h3>
+            <p>You can also use the programmatic API:</p>
+            <code>POST /api/query</code>
+            <pre>
+{
+    "prompt": "Your prompt here",
+    "max_turns": 3
+}
+            </pre>
+        </div>
+    </div>
+</body>
+</html>
