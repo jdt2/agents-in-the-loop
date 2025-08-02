@@ -151,3 +151,6 @@ sessions/
 
 # Log files
 *.log
+
+browseruse/*
+browser_use/temp

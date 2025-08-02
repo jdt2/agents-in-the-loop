@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Agent - Automated Testing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Browser Agent</h1>
+            <p>Automated browser testing and interaction</p>
+            <nav>
+                <a href="{{ url_for('index') }}">← Back to Claude Code</a>
+                <a href="{{ url_for('browser.list_browser_sessions') }}">View Sessions</a>
+            </nav>
+        </header>
+
+        {% if error %}
+            <div class="error">
+                <strong>Error:</strong> {{ error }}
+            </div>
+        {% endif %}
+
+        <main>
+            <form method="POST" action="{{ url_for('browser.run_browser_task') }}" class="query-form">
+                <div class="form-group">
+                    <label for="task">Task Description:</label>
+                    <textarea 
+                        id="task" 
+                        name="task" 
+                        rows="4" 
+                        placeholder="Describe what you want the browser agent to do (e.g., 'Test the login form with valid credentials', 'Navigate to the pricing page and extract all plan details', 'Fill out the contact form and submit it')"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="target_url">Target URL:</label>
+                    <input 
+                        type="url" 
+                        id="target_url" 
+                        name="target_url" 
+                        value="http://localhost:3000"
+                        placeholder="http://localhost:3000"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="submit-btn">🚀 Run Browser Agent</button>
+            </form>
+
+            <div class="info-section">
+                <h3>What can the Browser Agent do?</h3>
+                <ul>
+                    <li><strong>Web Testing:</strong> Automatically test web applications and forms</li>
+                    <li><strong>Data Extraction:</strong> Scrape information from web pages</li>
+                    <li><strong>User Interaction:</strong> Click buttons, fill forms, navigate pages</li>
+                    <li><strong>Analysis:</strong> Analyze page content and report findings</li>
+                    <li><strong>File Output:</strong> Save results and analysis to files</li>
+                </ul>
+
+                <h3>Example Tasks:</h3>
+                <div class="examples">
+                    <button class="example-btn" onclick="fillExample('Test the main navigation menu and check all links work properly')">Navigation Testing</button>
+                    <button class="example-btn" onclick="fillExample('Fill out the contact form with test data and verify submission')">Form Testing</button>
+                    <button class="example-btn" onclick="fillExample('Extract all product information from the homepage')">Data Extraction</button>
+                    <button class="example-btn" onclick="fillExample('Test the search functionality with various queries')">Search Testing</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function fillExample(task) {
+            document.getElementById('task').value = task;
+        }
+    </script>
+</body>
+</html>

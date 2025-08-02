@@ -5,11 +5,15 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for
 from dotenv import load_dotenv
 import anyio
 from claude_code_sdk import query, ClaudeCodeOptions
+from browser_agent.routes import browser_bp
 
 load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
+
+# Register blueprints
+app.register_blueprint(browser_bp)
 
 # Store sessions in memory (use Redis or database in production)
 sessions = {}

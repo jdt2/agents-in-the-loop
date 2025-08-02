@@ -14,6 +14,10 @@ The Flask app runs on port 3000 by default, accessible at `http://localhost:3000
 ```bash
 pip install -r requirements.txt
 ```
+Install the browser:
+```bash
+playwright install chromium --with-deps --no-shell
+```
 
 ### Environment Setup
 Copy `.env.example` to `.env` and configure:

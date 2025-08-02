@@ -29,6 +29,11 @@ A Python Flask web application that integrates with the Claude Code SDK, providi
    ```bash
    pip install -r requirements.txt
    ```
+   
+   Install the browser:
+   ```bash
+   playwright install chromium --with-deps --no-shell
+   ```
 
 3. **Set up environment variables:**
    - Copy `.env` file and add your Anthropic API key:
