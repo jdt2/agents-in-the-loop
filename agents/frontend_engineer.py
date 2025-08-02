@@ -13,7 +13,7 @@ class FrontendEngineer(BaseAgent):
     Can create React, Vue, Angular, or vanilla JavaScript projects
     """
     
-    def __init__(self, frontend_directory: str = "project/frontend", max_turns: int = 30):
+    def __init__(self, frontend_directory: str = "project/frontend", max_turns: int = 100):
         """
         Initialize the Frontend Engineer agent
         
@@ -213,6 +213,43 @@ Current project files:
 {files_context}
 
 Please set up a complete testing environment with example tests.
+"""
+        
+        return self.execute_task(task)
+    
+    def test_implementation(self) -> Dict[str, Any]:
+        """
+        Test the frontend implementation by installing dependencies and running checks
+        
+        Returns:
+            Dictionary containing test results
+        """
+        existing_files = self._get_created_files()
+        files_context = format_file_list(existing_files) if existing_files else "No existing files"
+        
+        task = f"""
+Test and validate the frontend implementation by performing the following steps:
+1. Check if package.json exists and has valid dependencies
+2. Install all npm dependencies (npm install or yarn install)
+3. Run the build process to ensure code compiles without errors
+4. Check for any TypeScript compilation errors
+5. Validate that all imports and modules resolve correctly
+6. Run the development server briefly to ensure it starts without errors
+7. Create a simple validation script that tests core functionality
+8. Generate a test report showing what works and any issues found
+
+Current project files:
+{files_context}
+
+IMPORTANT: Actually run the installation and build commands to verify everything works.
+Make sure to:
+- Use the appropriate package manager (npm, yarn, or pnpm)
+- Handle any dependency conflicts or version issues
+- Report specific error messages if anything fails
+- Suggest fixes for any problems found
+- Create a summary of the validation results
+
+Please perform actual testing and validation, not just theoretical checks.
 """
         
         return self.execute_task(task)
