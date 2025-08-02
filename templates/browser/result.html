@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Agent Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Browser Agent Results</h1>
+            <nav>
+                <a href="{{ url_for('browser.browser_index') }}">← New Task</a>
+                <a href="{{ url_for('index') }}">Claude Code</a>
+                <a href="{{ url_for('browser.list_browser_sessions') }}">All Sessions</a>
+            </nav>
+        </header>
+
+        <main>
+            <div class="session-info">
+                <h2>Task Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>Session ID:</strong>
+                        <span>{{ session.session_id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Status:</strong>
+                        <span class="status status-{{ session.status }}">{{ session.status.title() }}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Target URL:</strong>
+                        <a href="{{ session.target_url }}" target="_blank">{{ session.target_url }}</a>
+                    </div>
+                </div>
+                
+                <div class="task-description">
+                    <strong>Task:</strong>
+                    <p>{{ session.task }}</p>
+                </div>
+            </div>
+
+            {% if session.status == 'failed' and session.error %}
+                <div class="error">
+                    <h3>❌ Error</h3>
+                    <pre>{{ session.error }}</pre>
+                </div>
+            {% endif %}
+
+            {% if session.result %}
+                <div class="result-section">
+                    <h2>🎯 Execution Results</h2>
+                    
+                    {% if session.result.success %}
+                        <div class="success">
+                            <h3>✅ Task Completed Successfully</h3>
+                            <div class="result-details">
+                                {% if session.result.output_file %}
+                                    <p><strong>Output File:</strong> <code>{{ session.result.output_file }}</code></p>
+                                {% endif %}
+                                {% if session.result.result %}
+                                    <p><strong>Result:</strong> {{ session.result.result }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="error">
+                            <h3>❌ Task Failed</h3>
+                            <pre>{{ session.result.error }}</pre>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if output_content %}
+                <div class="output-section">
+                    <h2>📄 Generated Output</h2>
+                    <div class="output-content">
+                        <pre>{{ output_content }}</pre>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="actions">
+                <a href="{{ url_for('browser.browser_index') }}" class="btn btn-primary">Run Another Task</a>
+                {% if session.result and session.result.output_file %}
+                    <button onclick="downloadOutput()" class="btn btn-secondary">📥 Download Output</button>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function downloadOutput() {
+            // Create a simple download link for the output content
+            const content = document.querySelector('.output-content pre').textContent;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'browser_agent_output.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+
+    <style>
+        .session-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-running {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .task-description {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .result-section, .output-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+
+        .output-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .output-content pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</body>
+</html>
