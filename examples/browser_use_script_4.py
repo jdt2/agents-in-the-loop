@@ -28,9 +28,9 @@ async def main(prompt):
 
     # Configuration options for Claude Code with Playwright MCP
     options = ClaudeCodeOptions(
-        max_turns=5,
+        max_turns=10,
         system_prompt="You are a browser use assistant tasked to do quality assurance using Playwright.",
-        cwd=Path.cwd() / "project" / "testing",
+        cwd=Path.cwd() / "project",
         mcp_servers=mcp_servers,
         permission_mode="bypassPermissions",
         # Core tools - always available
@@ -79,8 +79,9 @@ if __name__ == "__main__":
     target_url = "http://localhost:3000"
     test_task = "Design a REST API endpoint for user authentication"
     target_directory = Path.cwd() / "project" / "testing" / "analysis"
-    prompt = f"""Go to {target_url} and test it with a prompt {test_task}, 
-    write any issues or failing points into the file {target_directory}/fixes.MD"""
+    prompt = f"""1. Go to {target_url} using the playwright tool
+    2. Test it with a prompt {test_task} 
+    3. Write any issues or failures into the file {target_directory}/fixes.MD"""
     
     # Create async wrapper function
     async def run_main():
