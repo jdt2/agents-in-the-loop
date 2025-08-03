@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Workflow Results - Claude Code Web Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .agent-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #007bff;
+        }
+        .agent-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        .agent-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .markdown-content {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            line-height: 1.6;
+        }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .markdown-content h1 {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .markdown-content ul, .markdown-content ol {
+            margin: 10px 0 10px 20px;
+        }
+        .markdown-content li {
+            margin: 5px 0;
+        }
+        .markdown-content strong {
+            color: #007bff;
+        }
+        .error-section {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .session-info {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .back-button {
+            display: inline-block;
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Agent Workflow Results</h1>
+            <p>Product Manager & Engineering Manager Analysis</p>
+            <nav>
+                <a href="{{ url_for('index') }}" class="nav-link">← Back to Home</a>
+                <a href="{{ url_for('health') }}" class="nav-link">Health Check</a>
+            </nav>
+        </header>
+
+        <div class="session-info">
+            <h3>Session Information</h3>
+            <p><strong>Session ID:</strong> {{ session.session_id }}</p>
+            <p><strong>Original Request:</strong> {{ session.prompt }}</p>
+            <p><strong>Workflow Type:</strong> Agent Coordination (PM → EM)</p>
+        </div>
+
+        {% if session.workflow_result %}
+            {% set workflow = session.workflow_result %}
+            
+            {% if workflow.success %}
+                <!-- Product Manager Response -->
+                {% if workflow.pm_response %}
+                    <div class="agent-section">
+                        <div class="agent-header">
+                            <span class="agent-icon">📋</span>
+                            <span class="agent-title">Product Manager Analysis</span>
+                        </div>
+                        
+                        {% if workflow.pm_response.error %}
+                            <div class="error-section">
+                                <strong>Error:</strong> {{ workflow.pm_response.error }}
+                                {% if workflow.pm_response.raw %}
+                                    <details>
+                                        <summary>Raw Response</summary>
+                                        <pre>{{ workflow.pm_response.raw }}</pre>
+                                    </details>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="markdown-content">
+                                {{ workflow.pm_response.markdown_content | safe }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- Engineering Manager Response -->
+                {% if workflow.em_response %}
+                    <div class="agent-section">
+                        <div class="agent-header">
+                            <span class="agent-icon">🏗️</span>
+                            <span class="agent-title">Engineering Manager Technical Plan</span>
+                        </div>
+                        
+                        {% if workflow.em_response.error %}
+                            <div class="error-section">
+                                <strong>Error:</strong> {{ workflow.em_response.error }}
+                                {% if workflow.em_response.raw %}
+                                    <details>
+                                        <summary>Raw Response</summary>
+                                        <pre>{{ workflow.em_response.raw }}</pre>
+                                    </details>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="markdown-content">
+                                {{ workflow.em_response.markdown_content | safe }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <!-- Workflow Error -->
+                <div class="error-section">
+                    <h3>Workflow Error</h3>
+                    <p><strong>Error:</strong> {{ workflow.error }}</p>
+                    
+                    {% if workflow.pm_response and workflow.pm_response.error %}
+                        <h4>Product Manager Error:</h4>
+                        <p>{{ workflow.pm_response.error }}</p>
+                    {% endif %}
+                    
+                    {% if workflow.em_response and workflow.em_response.error %}
+                        <h4>Engineering Manager Error:</h4>
+                        <p>{{ workflow.em_response.error }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <!-- Debug Information (if available) -->
+            {% if workflow.pm_raw or workflow.em_raw %}
+                <details style="margin-top: 30px;">
+                    <summary>Debug Information</summary>
+                    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 10px;">
+                        {% if workflow.pm_raw %}
+                            <h4>PM Raw Response:</h4>
+                            <pre style="white-space: pre-wrap; font-size: 12px;">{{ workflow.pm_raw }}</pre>
+                        {% endif %}
+                        
+                        {% if workflow.em_raw %}
+                            <h4>EM Raw Response:</h4>
+                            <pre style="white-space: pre-wrap; font-size: 12px;">{{ workflow.em_raw }}</pre>
+                        {% endif %}
+                    </div>
+                </details>
+            {% endif %}
+
+        {% else %}
+            <div class="error-section">
+                <h3>No Workflow Results</h3>
+                <p>No workflow results were found for this session.</p>
+            </div>
+        {% endif %}
+
+        <a href="{{ url_for('index') }}" class="back-button">← Start New Query</a>
+    </div>
+
+    <script>
+        // Convert markdown-like formatting to HTML for better display
+        document.addEventListener('DOMContentLoaded', function() {
+            const markdownElements = document.querySelectorAll('.markdown-content');
+            markdownElements.forEach(function(element) {
+                let content = element.innerHTML;
+                
+                // Convert markdown headers
+                content = content.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+                content = content.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+                content = content.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+                
+                // Convert markdown bold
+                content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                // Convert markdown lists (basic)
+                content = content.replace(/^- (.*$)/gim, '<li>$1</li>');
+                content = content.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+                
+                // Convert line breaks
+                content = content.replace(/\n/g, '<br>');
+                
+                element.innerHTML = content;
+            });
+        });
+    </script>
+</body>
+</html>
