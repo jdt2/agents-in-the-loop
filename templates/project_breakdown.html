@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Breakdown - AI Development Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="breakdown-container">
+        <div class="breakdown-layout">
+            <!-- Left Panel - Agent Status -->
+            <div class="left-panel">
+                <div class="agent-card">
+                    <!-- Product Manager Agent Character -->
+                    <div class="agent-character">
+                        <div class="agent-avatar product-manager">
+                            <div class="octopus-body">🐙</div>
+                            <div class="agent-accessories">
+                                <div class="glasses">👓</div>
+                                <div class="tie">👔</div>
+                                <div class="sticky-note">📝</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="agent-info">
+                        <h2 class="agent-title">Product Manager Agent</h2>
+                        <p class="agent-description">
+                            Analyzing your product idea and creating actionable task breakdown!
+                        </p>
+                        
+                        <div class="agent-status">
+                            <div class="status-indicator ready" id="agent-status">
+                                <span class="status-dot"></span>
+                                <span class="status-text">Ready to Start</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="agent-actions">
+                        <button id="start-automation-btn" class="start-btn">
+                            <span class="btn-icon">▶️</span>
+                            Start Automation
+                        </button>
+                        
+                        <button class="back-btn" onclick="window.location.href='/'">
+                            <span class="btn-icon">◀️</span>
+                            Back to Home
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Panel - Project Details -->
+            <div class="right-panel">
+                <div class="project-header">
+                    <h1 class="page-title">Project Breakdown</h1>
+                    
+                    <div class="project-meta">
+                        <label for="project-name" class="project-label">Project:</label>
+                        <input 
+                            type="text" 
+                            id="project-name" 
+                            class="project-input"
+                            value="{{ project_idea or '' }}"
+                            placeholder="Enter your project idea..."
+                        >
+                    </div>
+                </div>
+                
+                <!-- Progress Section -->
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <h3>Overall Progress</h3>
+                        <span class="progress-percent" id="progress-percent">0%</span>
+                    </div>
+                    
+                    <div class="progress-bar-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Workflow Steps -->
+                <div class="workflow-steps" id="workflow-steps">
+                    <div class="step-item" data-step="product-manager">
+                        <div class="step-icon">🎯</div>
+                        <div class="step-content">
+                            <h4>Product Manager</h4>
+                            <p>Analyzing requirements and creating specifications</p>
+                        </div>
+                        <div class="step-status pending">Pending</div>
+                    </div>
+                    
+                    <div class="step-item" data-step="engineering-manager">
+                        <div class="step-icon">👔</div>
+                        <div class="step-content">
+                            <h4>Engineering Manager</h4>
+                            <p>Creating technical architecture and team coordination</p>
+                        </div>
+                        <div class="step-status pending">Pending</div>
+                    </div>
+                    
+                    <div class="step-item" data-step="frontend-engineer">
+                        <div class="step-icon">🎨</div>
+                        <div class="step-content">
+                            <h4>Frontend Engineer</h4>
+                            <p>Building React TypeScript user interface</p>
+                        </div>
+                        <div class="step-status pending">Pending</div>
+                    </div>
+                    
+                    <div class="step-item" data-step="backend-engineer">
+                        <div class="step-icon">⚙️</div>
+                        <div class="step-content">
+                            <h4>Backend Engineer</h4>
+                            <p>Creating FastAPI server and database</p>
+                        </div>
+                        <div class="step-status pending">Pending</div>
+                    </div>
+                    
+                    <div class="step-item" data-step="testing-engineer">
+                        <div class="step-icon">🧪</div>
+                        <div class="step-content">
+                            <h4>Testing Engineer</h4>
+                            <p>Running comprehensive end-to-end testing</p>
+                        </div>
+                        <div class="step-status pending">Pending</div>
+                    </div>
+                </div>
+                
+                <!-- Status Messages -->
+                <div class="status-messages" id="status-messages">
+                    <div class="status-message info">
+                        <span class="message-icon">ℹ️</span>
+                        <span class="message-text">Click "Start Automation" to begin the development workflow</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let workflowId = null;
+        let statusInterval = null;
+        
+        // Handle start automation button
+        document.getElementById('start-automation-btn').addEventListener('click', function() {
+            const projectIdea = document.getElementById('project-name').value.trim();
+            
+            if (!projectIdea) {
+                alert('Please enter your project idea first!');
+                document.getElementById('project-name').focus();
+                return;
+            }
+            
+            startWorkflow(projectIdea);
+        });
+        
+        async function startWorkflow(userRequest) {
+            try {
+                // Update UI to show starting
+                updateAgentStatus('starting', 'Starting workflow...');
+                document.getElementById('start-automation-btn').disabled = true;
+                
+                // Start the workflow
+                const response = await fetch('/api/start-workflow', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_request: userRequest
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    workflowId = result.workflow_id;
+                    addStatusMessage('success', `Workflow started successfully! ID: ${workflowId}`);
+                    
+                    // Start polling for status updates
+                    statusInterval = setInterval(pollWorkflowStatus, 2000);
+                } else {
+                    throw new Error(result.error || 'Failed to start workflow');
+                }
+                
+            } catch (error) {
+                console.error('Error starting workflow:', error);
+                addStatusMessage('error', `Error: ${error.message}`);
+                updateAgentStatus('error', 'Failed to start');
+                document.getElementById('start-automation-btn').disabled = false;
+            }
+        }
+        
+        async function pollWorkflowStatus() {
+            if (!workflowId) return;
+            
+            try {
+                const response = await fetch(`/api/workflow-status/${workflowId}`);
+                const workflow = await response.json();
+                
+                if (response.ok) {
+                    updateWorkflowProgress(workflow);
+                    
+                    // Stop polling if workflow is complete
+                    if (workflow.status === 'completed' || workflow.status === 'failed') {
+                        clearInterval(statusInterval);
+                        
+                        if (workflow.status === 'completed') {
+                            addStatusMessage('success', 'Workflow completed successfully!');
+                            setTimeout(() => {
+                                window.location.href = `/workflow-results/${workflowId}`;
+                            }, 2000);
+                        } else {
+                            addStatusMessage('error', 'Workflow failed. Check logs for details.');
+                            document.getElementById('start-automation-btn').disabled = false;
+                        }
+                    }
+                } else {
+                    throw new Error(workflow.error || 'Failed to get status');
+                }
+                
+            } catch (error) {
+                console.error('Error polling status:', error);
+                addStatusMessage('error', `Status error: ${error.message}`);
+            }
+        }
+        
+        function updateWorkflowProgress(workflow) {
+            // Update overall progress
+            const progress = workflow.progress || 0;
+            document.getElementById('progress-percent').textContent = `${progress}%`;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+            
+            // Update agent status
+            updateAgentStatus('running', `${workflow.current_step || 'Processing'}...`);
+            
+            // Update individual step statuses
+            if (workflow.agents) {
+                Object.keys(workflow.agents).forEach(agentName => {
+                    const agent = workflow.agents[agentName];
+                    const stepElement = document.querySelector(`[data-step="${agentName.replace('_', '-')}"]`);
+                    if (stepElement) {
+                        const statusElement = stepElement.querySelector('.step-status');
+                        statusElement.className = `step-status ${agent.status}`;
+                        statusElement.textContent = agent.status.charAt(0).toUpperCase() + agent.status.slice(1);
+                    }
+                });
+            }
+        }
+        
+        function updateAgentStatus(status, message) {
+            const statusElement = document.getElementById('agent-status');
+            const statusText = statusElement.querySelector('.status-text');
+            
+            statusElement.className = `status-indicator ${status}`;
+            statusText.textContent = message;
+        }
+        
+        function addStatusMessage(type, message) {
+            const messagesContainer = document.getElementById('status-messages');
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `status-message ${type}`;
+            
+            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+            messageElement.innerHTML = `
+                <span class="message-icon">${icon}</span>
+                <span class="message-text">${message}</span>
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+            
+            // Auto-scroll to latest message
+            messageElement.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Handle Enter key in project input
+        document.getElementById('project-name').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('start-automation-btn').click();
+            }
+        });
+    </script>
+</body>
+</html>

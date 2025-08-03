@@ -4,6 +4,7 @@ import uuid
 import subprocess
 import json
 import dataclasses
+import threading
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from dotenv import load_dotenv
@@ -16,6 +17,9 @@ except ImportError:
     SDK_AVAILABLE = False
     print("Claude Code SDK not available, using CLI subprocess method")
 
+# Import master workflow
+from master_workflow import MasterWorkflow
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -23,6 +27,38 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
 
 # Store sessions in memory (use Redis or database in production)
 sessions = {}
+
+# Store workflow progress in memory (use Redis or database in production)
+workflows = {}
+
+def run_master_workflow_async(user_request, workflow_id):
+    """Run master workflow in background thread"""
+    try:
+        # Initialize workflow with progress tracking
+        workflow = MasterWorkflow(verbose=False)  # Disable console output for web
+        
+        # Update status to running
+        workflows[workflow_id]['status'] = 'running'
+        workflows[workflow_id]['current_step'] = 'initializing'
+        
+        # Run the complete workflow
+        result = workflow.run_full_workflow(user_request)
+        
+        # Store final results
+        workflows[workflow_id].update({
+            'status': 'completed' if result['success'] else 'failed',
+            'result': result,
+            'current_step': 'completed',
+            'progress': 100
+        })
+        
+    except Exception as e:
+        workflows[workflow_id].update({
+            'status': 'failed',
+            'error': str(e),
+            'current_step': 'failed',
+            'progress': 0
+        })
 
 def run_async(coro):
     """Helper function to run async code in Flask"""
@@ -683,8 +719,109 @@ def run_dynamic_agent_workflow_sync(user_request):
 
 @app.route('/')
 def index():
-    """Main page with query form"""
+    """Main page with modern project creation interface"""
     return render_template('index.html')
+
+@app.route('/project-breakdown')
+def project_breakdown():
+    """Project breakdown page with agent workflow visualization"""
+    project_idea = request.args.get('idea', '')
+    return render_template('project_breakdown.html', project_idea=project_idea)
+
+@app.route('/api/start-workflow', methods=['POST'])
+def start_workflow():
+    """Start master workflow execution"""
+    try:
+        data = request.get_json()
+        if not data or 'user_request' not in data:
+            return jsonify({'error': 'User request is required'}), 400
+        
+        user_request = data['user_request'].strip()
+        if not user_request:
+            return jsonify({'error': 'User request cannot be empty'}), 400
+        
+        # Generate workflow ID
+        workflow_id = str(uuid.uuid4())
+        
+        # Initialize workflow tracking
+        workflows[workflow_id] = {
+            'id': workflow_id,
+            'user_request': user_request,
+            'status': 'initializing',
+            'current_step': 'pending',
+            'progress': 0,
+            'created_at': datetime.now().isoformat(),
+            'agents': {
+                'product_manager': {'status': 'pending', 'progress': 0},
+                'engineering_manager': {'status': 'pending', 'progress': 0},
+                'frontend_engineer': {'status': 'pending', 'progress': 0},
+                'backend_engineer': {'status': 'pending', 'progress': 0},
+                'testing_engineer': {'status': 'pending', 'progress': 0}
+            }
+        }
+        
+        # Start workflow in background thread
+        thread = threading.Thread(
+            target=run_master_workflow_async, 
+            args=(user_request, workflow_id)
+        )
+        thread.daemon = True
+        thread.start()
+        
+        return jsonify({
+            'success': True,
+            'workflow_id': workflow_id,
+            'status': 'started'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/workflow-status/<workflow_id>')
+def workflow_status(workflow_id):
+    """Get real-time workflow status"""
+    try:
+        if workflow_id not in workflows:
+            return jsonify({'error': 'Workflow not found'}), 404
+        
+        workflow_data = workflows[workflow_id]
+        return jsonify(workflow_data)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/workflow', methods=['POST'])
+def api_workflow():
+    """API endpoint for full master workflow execution"""
+    try:
+        data = request.get_json()
+        if not data or 'user_request' not in data:
+            return jsonify({'error': 'User request is required'}), 400
+        
+        user_request = data['user_request']
+        
+        # Run master workflow
+        workflow = MasterWorkflow(verbose=False)
+        result = workflow.run_full_workflow(user_request)
+        
+        return jsonify({
+            'success': result['success'],
+            'workflow_id': result['workflow_id'],
+            'result': result,
+            'duration': result['total_duration']
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/workflow-results/<workflow_id>')
+def workflow_results(workflow_id):
+    """View workflow results page"""
+    if workflow_id not in workflows:
+        return render_template('index.html', error='Workflow not found'), 404
+    
+    workflow_data = workflows[workflow_id]
+    return render_template('workflow_results.html', workflow=workflow_data)
 
 @app.route('/query', methods=['POST'])
 def handle_query():

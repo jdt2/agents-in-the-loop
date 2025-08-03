@@ -3,71 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claude Code Web Interface</title>
+    <title>AI Development Platform - Build Anything</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Claude Code Web Interface</h1>
-            <p>Interact with Claude Code SDK through a web interface</p>
-            <nav>
-                <a href="{{ url_for('health') }}" class="nav-link">Health Check</a>
-            </nav>
-        </header>
-
+    <div class="hero-container">
         {% if error %}
-        <div class="error">
-            <strong>Error:</strong> {{ error }}
+        <div class="error-banner">
+            <strong>⚠️ Error:</strong> {{ error }}
         </div>
         {% endif %}
 
-        <form method="POST" action="/query" class="query-form">
-            <div class="form-group">
-                <label for="prompt">Enter your prompt:</label>
-                <textarea 
-                    id="prompt" 
-                    name="prompt" 
-                    rows="6" 
-                    placeholder="Enter your coding request or question here..."
-                    required
-                ></textarea>
+        <div class="hero-content">
+            <!-- Main Hero Section -->
+            <div class="hero-header">
+                <h1 class="hero-title">What do you want to build?</h1>
+                <p class="hero-subtitle">
+                    Describe your product idea and our AI Product Manager will break it down
+                    into actionable tasks with automated agent assignments.
+                </p>
             </div>
 
-            <div class="form-group">
-                <label for="max_turns">Maximum turns:</label>
-                <select id="max_turns" name="max_turns">
-                    <option value="1">1 turn</option>
-                    <option value="3" selected>3 turns</option>
-                    <option value="5">5 turns</option>
-                    <option value="10">10 turns</option>
-                </select>
+            <!-- Main Input Form -->
+            <div class="hero-form">
+                <div class="input-container">
+                    <textarea 
+                        id="product-idea" 
+                        placeholder="e.g., A Luma clone, Instagram for pets, Slack for teams..."
+                        rows="3"
+                        maxlength="500"
+                    ></textarea>
+                    <div class="input-icon">💡</div>
+                </div>
+                
+                <button id="start-project-btn" class="cta-button">
+                    <span class="button-text">✨ Start Project Breakdown</span>
+                </button>
             </div>
 
-            <button type="submit" class="submit-btn">Submit Query</button>
-        </form>
-
-        <div class="info">
-            <h3>Usage Examples:</h3>
-            <ul>
-                <li>"Write a Python function to calculate Fibonacci numbers"</li>
-                <li>"Review this code for bugs and suggest improvements"</li>
-                <li>"Create a REST API endpoint for user authentication"</li>
-                <li>"Add unit tests for the calculator module"</li>
-            </ul>
+            <!-- Popular Ideas Section -->
+            <div class="popular-ideas">
+                <p class="popular-label">Popular ideas:</p>
+                <div class="idea-chips">
+                    <button class="idea-chip" data-idea="A Luma clone">A Luma clone</button>
+                    <button class="idea-chip" data-idea="Task management app">Task management app</button>
+                    <button class="idea-chip" data-idea="Social media platform">Social media platform</button>
+                </div>
+            </div>
         </div>
 
-        <div class="api-info">
-            <h3>API Access:</h3>
-            <p>You can also use the programmatic API:</p>
-            <code>POST /api/query</code>
-            <pre>
-{
-    "prompt": "Your prompt here",
-    "max_turns": 3
-}
-            </pre>
+        <!-- Features Section -->
+        <div class="features-section">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Smart Analysis</h3>
+                    <p>AI Product Manager analyzes your idea and creates detailed specifications</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Automated Development</h3>
+                    <p>Multiple specialized agents work together to build your complete application</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Ready to Deploy</h3>
+                    <p>Get a fully functional, tested application ready for production</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-links">
+                <a href="{{ url_for('health') }}" class="footer-link">Health Check</a>
+                <a href="/api/docs" class="footer-link">API Docs</a>
+            </div>
+            <p class="footer-text">Powered by Claude Code SDK & Specialized AI Agents</p>
         </div>
     </div>
+
+    <script>
+        // Handle idea chip clicks
+        document.querySelectorAll('.idea-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                const idea = this.getAttribute('data-idea');
+                document.getElementById('product-idea').value = idea;
+                document.getElementById('product-idea').focus();
+            });
+        });
+
+        // Handle start project button
+        document.getElementById('start-project-btn').addEventListener('click', function() {
+            const productIdea = document.getElementById('product-idea').value.trim();
+            
+            if (!productIdea) {
+                alert('Please describe your product idea first!');
+                document.getElementById('product-idea').focus();
+                return;
+            }
+
+            // Redirect to project breakdown page with the idea
+            const encodedIdea = encodeURIComponent(productIdea);
+            window.location.href = `/project-breakdown?idea=${encodedIdea}`;
+        });
+
+        // Handle Enter key in textarea
+        document.getElementById('product-idea').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('start-project-btn').click();
+            }
+        });
+
+        // Auto-resize textarea
+        document.getElementById('product-idea').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+    </script>
 </body>
 </html>
